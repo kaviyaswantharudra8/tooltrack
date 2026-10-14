@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToolTrack — Intelligent Student Fabrication Routing Engine</title>
+  <meta name="description" content="Never overpay or get stuck on student maker projects. ToolTrack benchmarks alternative fabrication routes across cost, time, and campus tools.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#FF6200',
+              hover: '#E05500',
+              subtle: '#FFF3EB',
+              dark: '#140801'
+            },
+            surface: {
+              base: 'var(--bg-base)',
+              card: 'var(--bg-card)',
+              cardAlt: 'var(--bg-card-alt)',
+              border: 'var(--border-color)',
+              text: 'var(--text-main)',
+              muted: 'var(--text-muted)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-base: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-alt: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+    .dark {
+      --bg-base: #090a0f;
+      --bg-card: #11131a;
+      --bg-card-alt: #171b26;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * {
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 999px;
+    }
+    .orange-glow {
+      box-shadow: 0 0 25px -4px rgba(255, 98, 0, 0.22);
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-surface-base text-surface-text font-sans min-h-screen flex flex-col antialiased selection:bg-brand selection:text-white">
+
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-surface-base/80 border-b border-surface-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between">
+      
+      <!-- Brand Logo & Name -->
+      <a href="#" class="flex items-center gap-3 group focus:outline-none">
+        <!-- SVG Vector Emblem derived from official ToolTrack mark -->
+        <div class="relative w-10 h-10 flex-shrink-0">
+          <svg viewBox="0 0 160 160" class="w-full h-full filter drop-shadow-sm" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background Badge Frame -->
+            <rect width="160" height="160" rx="32" fill="#0E1017"/>
+            <!-- Wrench Crossbars (Top 'T' wings) -->
+            <path d="M 32 46 C 32 41 36 38 41 38 L 70 38 C 72 38 73 40 73 42 L 73 50 C 73 52 71 54 69 54 L 38 54 C 34.6 54 32 50.4 32 46 Z" fill="#E2E8F0"/>
+            <path d="M 128 46 C 128 41 124 38 119 38 L 90 38 C 88 38 87 40 87 42 L 87 50 C 87 52 89 54 91 54 L 122 54 C 125.4 54 128 50.4 128 46 Z" fill="#E2E8F0"/>
+            <!-- Lower Wrench Shaft & Head -->
+            <path d="M 72 52 L 88 52 L 88 95 C 93 97 97 103 97 110 C 97 119.4 89.4 127 80 127 C 70.6 127 63 119.4 63 110 C 63 103 67 97 72 95 Z" fill="#E2E8F0"/>
+            <!-- Wrench Bottom Hex Bolt Slot -->
+            <path d="M 80 102 L 87 114 L 84 127 L 76 127 L 73 114 Z" fill="#0E1017"/>
+            <!-- Location Pin Header (Orange core marker) -->
+            <path d="M 80 34 C 67 34 57 44 57 57 C 57 73 80 97 80 97 C 80 97 103 73 103 57 C 103 44 93 34 80 34 Z" fill="url(#brandGradient)"/>
+            <!-- Pin Center Core Dot -->
+            <circle cx="80" cy="57" r="8" fill="#0E1017"/>
+            <defs>
+              <linearGradient id="brandGradient" x1="57" y1="34" x2="103" y2="97" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#FF7A00"/>
+                <stop offset="1" stop-color="#FF4800"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1">
+            <span class="text-xl font-extrabold tracking-wider text-surface-text">TOOL</span>
+            <span class="text-xl font-extrabold text-brand">-</span>
+            <span class="text-xl font-extrabold tracking-wider text-surface-text">TRACK</span>
+          </div>
+          <span class="text-[10px] font-mono tracking-widest text-surface-muted uppercase -mt-1">Fabrication Routing</span>
+        </div>
+      </a>
+
+      <!-- Controls: Theme Toggle & Quick Actions -->
+      <div class="flex items-center gap-3">
+        <a href="#demo" class="hidden sm:inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg bg-surface-card border border-surface-border hover:border-brand/50 transition">
+          <i class="fa-solid fa-bolt text-brand"></i>
+          <span>Live Engine</span>
+        </a>
+        <a href="#pricing" class="hidden sm:inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg bg-surface-card border border-surface-border hover:border-brand/50 transition">
+          <span>₹100/yr Pro</span>
+          <span class="text-[10px] bg-brand text-white px-1.5 py-0.5 rounded font-bold">PRO</span>
+        </a>
+
+        <!-- Light / Dark Mode Toggle Button -->
+        <button id="themeToggleBtn" title="Toggle Light/Dark Theme" class="w-9 h-9 rounded-lg bg-surface-card border border-surface-border flex items-center justify-center text-surface-muted hover:text-brand transition focus:outline-none">
+          <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+
+        <a href="#contact" class="text-xs font-bold px-3.5 py-2 rounded-lg bg-brand text-white hover:bg-brand-hover shadow-sm transition">
+          Contact
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow">
+    
+    <!-- Hero Banner -->
+    <section class="relative pt-12 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden text-center">
+      <!-- Minimalist orange gradient accent blur -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+      
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-xs font-semibold uppercase tracking-wider mb-6">
+        <span class="w-2 h-2 rounded-full bg-brand animate-ping"></span>
+        Built for Student Makers &amp; Engineering Labs
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight sm:leading-tight mb-5">
+        Never Overpay for a Build. <br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand via-orange-400 to-amber-500">
+          Find the Smartest Route to Fabricate.
+        </span>
+      </h1>
+
+      <p class="text-base sm:text-lg text-surface-muted max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
+        Stop losing days to high-cost vendors or abandoned project ideas. ToolTrack benchmarks 
+        <strong class="text-surface-text font-semibold">Commercial Outsourcing</strong>, 
+        <strong class="text-surface-text font-semibold">Digital Fabrication</strong>, and 
+        <strong class="text-surface-text font-semibold">Zero-Cost DIY Hacks</strong> side-by-side.
+      </p>
+
+      <div class="flex flex-wrap justify-center items-center gap-3">
+        <a href="#demo" class="px-6 py-3 rounded-xl bg-brand text-white font-semibold text-sm hover:bg-brand-hover shadow-lg shadow-brand/20 transition flex items-center gap-2">
+          <i class="fa-solid fa-play text-xs"></i>
+          <span>Try Interactive Routing Engine</span>
+        </a>
+        <a href="#pricing" class="px-6 py-3 rounded-xl bg-surface-card border border-surface-border hover:border-brand/40 text-surface-text font-semibold text-sm transition flex items-center gap-2">
+          <span>Compare Free vs. ₹100 Pro</span>
+          <i class="fa-solid fa-arrow-right text-xs text-brand"></i>
+        </a>
+      </div>
+
+      <!-- Quick Trust Indicators -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto mt-14 pt-8 border-t border-surface-border/60 text-left">
+        <div class="p-3">
+          <p class="text-2xl font-black text-brand font-mono">10x - 30x</p>
+          <p class="text-xs text-surface-muted mt-1">Cost savings on student hardware enclosures</p>
+        </div>
+        <div class="p-3">
+          <p class="text-2xl font-black text-surface-text font-mono">3 Routes</p>
+          <p class="text-xs text-surface-muted mt-1">Commercial vs 3D Print vs Smart DIY Hack</p>
+        </div>
+        <div class="p-3">
+          <p class="text-2xl font-black text-surface-text font-mono">100%</p>
+          <p class="text-xs text-surface-muted mt-1">Tool-aware filtering using local campus inventory</p>
+        </div>
+        <div class="p-3">
+          <p class="text-2xl font-black text-brand font-mono">₹100/yr</p>
+          <p class="text-xs text-surface-muted mt-1">Pro subscription with verified discount coupons</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="demo" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-20">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+          <span class="text-xs font-mono font-bold tracking-widest text-brand uppercase">Live Interactive Demo</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">Fabrication Route Planner</h2>
+          <p class="text-xs sm:text-sm text-surface-muted mt-1">Select a sample task or enter your custom project requirement below.</p>
+        </div>
+
+        <!-- PLAN SIMULATOR TOGGLE (Free vs ₹100/yr Pro) -->
+        <div class="bg-surface-card border border-surface-border p-1.5 rounded-xl flex items-center gap-1 shadow-sm self-start md:self-auto">
+          <span class="text-[11px] font-semibold text-surface-muted px-2 hidden sm:inline">Simulation Mode:</span>
+          <button id="viewFreeBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand text-white shadow-sm">
+            <i class="fa-solid fa-user text-[11px]"></i>
+            <span>Free Tier</span>
+          </button>
+          <button id="viewProBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-surface-muted hover:text-surface-text">
+            <i class="fa-solid fa-crown text-amber-500 text-[11px]"></i>
+            <span>Pro (₹100/yr)</span>
+            <span class="bg-amber-500/20 text-amber-400 text-[9px] px-1 py-0.2 rounded font-mono font-bold">UNLOCKED</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Engine Card -->
+      <div class="bg-surface-card border border-surface-border rounded-2xl p-4 sm:p-6 shadow-sm mb-6">
+        
+        <!-- Search Input Bar -->
+        <div class="relative flex flex-col sm:flex-row gap-2 mb-4">
+          <div class="relative flex-grow">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-surface-muted text-sm"></i>
+            <input 
+              type="text" 
+              id="taskInput" 
+              placeholder="What do you need to make? (e.g. Speaker for listening songs, Badge, Enclosure...)" 
+              class="w-full pl-11 pr-4 py-3 bg-surface-cardAlt border border-surface-border rounded-xl text-sm font-medium focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-surface-muted/70 text-surface-text"
+              value="Speaker for listening songs"
+            >
+          </div>
+          <button 
+            id="calculateBtn" 
+            class="px-5 py-3 rounded-xl bg-brand text-white font-bold text-xs uppercase tracking-wider hover:bg-brand-hover transition flex items-center justify-center gap-2 whitespace-nowrap shadow-sm"
+          >
+            <i class="fa-solid fa-sliders"></i>
+            <span>Find Routes</span>
+          </button>
+        </div>
+
+        <!-- Quick Task Pills -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <span class="text-[11px] font-mono text-surface-muted uppercase mr-1">Quick Presets:</span>
+          <button class="preset-pill px-3 py-1.5 rounded-lg bg-surface-cardAlt border border-surface-border hover:border-brand/40 text-xs text-surface-text transition font-medium active:scale-95" data-query="Speaker for listening songs">
+            🎵 Speaker for listening songs
+          </button>
+          <button class="preset-pill px-3 py-1.5 rounded-lg bg-surface-cardAlt border border-surface-border hover:border-brand/40 text-xs text-surface-text transition font-medium active:scale-95" data-query="Badge / ID Card Enclosure">
+            🪪 Badge / ID Card Enclosure
+          </button>
+          <button class="preset-pill px-3 py-1.5 rounded-lg bg-surface-cardAlt border border-surface-border hover:border-brand/40 text-xs text-surface-text transition font-medium active:scale-95" data-query="Arduino Sensor Enclosure">
+            🤖 Arduino Sensor Enclosure
+          </button>
+          <button class="preset-pill px-3 py-1.5 rounded-lg bg-surface-cardAlt border border-surface-border hover:border-brand/40 text-xs text-surface-text transition font-medium active:scale-95" data-query="Custom PCB Breakout Board">
+            ⚡ Custom PCB Breakout Board
+          </button>
+        </div>
+
+        <!-- Tier Status Bar (Visual feedback of active simulation) -->
+        <div id="tierStatusBanner" class="mt-5 p-3 rounded-xl bg-surface-cardAlt/80 border border-surface-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <!-- Results Container (3 Routes side-by-side) -->
+      <div id="routesContainer" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Dynamically injected route cards -->
+      </div>
+    </section>
+
+    <!-- Plan Difference: Free vs ₹100/yr Pro Section -->
+    <section id="pricing" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-20">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-xs font-mono font-bold tracking-widest text-brand uppercase">Subscription &amp; Value Architecture</span>
+        <h2 class="text-3xl font-extrabold tracking-tight mt-1">Free Tier vs. ToolTrack Pro</h2>
+        <p class="text-sm text-surface-muted mt-2">
+          Engineered for engineering students. At just ₹100 for an entire year (less than ₹8.5/month), a single coupon saves your annual subscription cost on day one.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        
+        <!-- Free Tier Card -->
+        <div class="bg-surface-card border border-surface-border rounded-2xl p-6 sm:p-8 flex flex-col justify-between card-hover">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-surface-muted bg-surface-cardAlt px-2.5 py-1 rounded-md">
+                Standard
+              </span>
+              <span class="text-xs text-surface-muted">Basic Student Access</span>
+            </div>
+            
+            <div class="flex items-baseline gap-1 mb-2">
+              <span class="text-4xl font-extrabold font-mono text-surface-text">₹0</span>
+              <span class="text-surface-muted text-sm font-medium">/ forever</span>
+            </div>
+            <p class="text-xs text-surface-muted mb-6">Designed for occasional project benchmarking and fast trade-off estimations.</p>
+
+            <ul class="space-y-3.5 text-xs text-surface-text">
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-brand mt-0.5"></i>
+                <span><strong>5 Route Searches per week</strong> (resets weekly)</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-brand mt-0.5"></i>
+                <span>Cost, Time &amp; Skill matrix comparison</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-brand mt-0.5"></i>
+                <span>High-level DIY workaround guides</span>
+              </li>
+              <li class="flex items-start gap-2.5 text-surface-muted/60">
+                <i class="fa-solid fa-xmark text-red-400 mt-0.5"></i>
+                <span><span class="line-through">Direct 1-Click Purchase Links</span> (Paths only, no store URLs)</span>
+              </li>
+              <li class="flex items-start gap-2.5 text-surface-muted/60">
+                <i class="fa-solid fa-xmark text-red-400 mt-0.5"></i>
+                <span><span class="line-through">Exclusive Student Store Coupons</span></span>
+              </li>
+              <li class="flex items-start gap-2.5 text-surface-muted/60">
+                <i class="fa-solid fa-xmark text-red-400 mt-0.5"></i>
+                <span><span class="line-through">Campus Tool Locker Locations</span> (Find free tools in lab)</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-surface-border">
+            <button onclick="setSimulationMode('free')" class="w-full py-2.5 rounded-xl bg-surface-cardAlt border border-surface-border hover:border-brand/50 font-bold text-xs text-surface-text transition">
+              Use Standard Free Tier
+            </button>
+          </div>
+        </div>
+
+        <!-- Pro Tier Card (Highlighted) -->
+        <div class="relative bg-surface-card border-2 border-brand rounded-2xl p-6 sm:p-8 flex flex-col justify-between orange-glow card-hover">
+          <!-- Pro Badge -->
+          <div class="absolute -top-3.5 right-6 bg-gradient-to-r from-brand to-amber-500 text-white text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
+            RECOMMENDED FOR MAKERS
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-brand bg-brand/10 px-2.5 py-1 rounded-md">
+                ToolTrack Pro
+              </span>
+              <span class="text-xs font-bold text-amber-500 flex items-center gap-1">
+                <i class="fa-solid fa-crown text-[11px]"></i> Premium
+              </span>
+            </div>
+            
+            <div class="flex items-baseline gap-1 mb-2">
+              <span class="text-4xl font-extrabold font-mono text-brand">₹100</span>
+              <span class="text-surface-muted text-sm font-medium">/ 1 full year</span>
+            </div>
+            <p class="text-xs text-surface-muted mb-6">Pays for itself immediately through exclusive component coupons and verified campus tools.</p>
+
+            <ul class="space-y-3.5 text-xs text-surface-text">
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-brand mt-0.5"></i>
+                <span><strong class="text-brand">Unlimited route searches</strong> (Zero weekly limits)</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-brand mt-0.5"></i>
+                <span><strong>Direct 1-Click Purchase Links</strong> (Robu, Amazon, local electronics shops)</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-brand mt-0.5"></i>
+                <span><strong>Active Student Coupons</strong> (Save 10% to 25% on filaments, boards &amp; ICs)</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-brand mt-0.5"></i>
+                <span><strong>Campus Tool Locker Radar</strong> (Locate free soldering irons, wire cutters, and 3D printers on campus)</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-check text-brand mt-0.5"></i>
+                <span>Downloadable parametric CAD/STL 3D print templates</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-surface-border">
+            <button onclick="setSimulationMode('pro')" class="w-full py-2.5 rounded-xl bg-brand hover:bg-brand-hover font-bold text-xs text-white shadow-md shadow-brand/20 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bolt text-xs"></i>
+              <span>Activate Pro Simulation (₹100/yr)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Team & Venture Leadership Section -->
+    <section class="py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-surface-border">
+      <div class="text-center max-w-xl mx-auto mb-10">
+        <span class="text-xs font-mono font-bold tracking-widest text-brand uppercase">Venture Leadership</span>
+        <h2 class="text-2xl font-extrabold tracking-tight mt-1">The Founding Team</h2>
+        <p class="text-xs sm:text-sm text-surface-muted mt-1">Electronics and Communication Engineering, RGUKT Ongole</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <!-- Founder 1 -->
+        <div class="bg-surface-card border border-surface-border rounded-xl p-5 text-center card-hover">
+          <div class="w-14 h-14 rounded-full bg-brand/10 border-2 border-brand text-brand flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">
+            KY
+          </div>
+          <h3 class="font-bold text-sm text-surface-text">Kavi Yaswanth Arudra</h3>
+          <p class="text-xs font-semibold text-brand mt-0.5">Founder &amp; Strategy Lead</p>
+          <p class="text-[11px] text-surface-muted mt-2">Product development, system architecture &amp; fabrication routing algorithms.</p>
+        </div>
+
+        <!-- Founder 2 -->
+        <div class="bg-surface-card border border-surface-border rounded-xl p-5 text-center card-hover">
+          <div class="w-14 h-14 rounded-full bg-surface-cardAlt border border-surface-border text-surface-text flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">
+            KP
+          </div>
+          <h3 class="font-bold text-sm text-surface-text">K. N. D. Poojitha</h3>
+          <p class="text-xs font-semibold text-surface-muted mt-0.5">Co-Founder &amp; Operations</p>
+          <p class="text-[11px] text-surface-muted mt-2">Field testing, campus tool inventory tracking &amp; vendor partnerships.</p>
+        </div>
+
+        <!-- Founder 3 -->
+        <div class="bg-surface-card border border-surface-border rounded-xl p-5 text-center card-hover">
+          <div class="w-14 h-14 rounded-full bg-surface-cardAlt border border-surface-border text-surface-text flex items-center justify-center mx-auto mb-3 font-extrabold text-lg">
+            RD
+          </div>
+          <h3 class="font-bold text-sm text-surface-text">R. Devasri</h3>
+          <p class="text-xs font-semibold text-surface-muted mt-0.5">Co-Founder &amp; Marketing</p>
+          <p class="text-[11px] text-surface-muted mt-2">Campus maker outreach, digital growth &amp; community development.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Help & Contact Footer -->
+  <footer id="contact" class="bg-surface-card border-t border-surface-border py-12 px-4 sm:px-6 lg:px-8 mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+      
+      <!-- Left: Logo & Campus Attribution -->
+      <div class="flex flex-col items-center md:items-start text-center md:text-left">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-lg font-extrabold tracking-wider text-surface-text">TOOL</span>
+          <span class="text-lg font-extrabold text-brand">-</span>
+          <span class="text-lg font-extrabold tracking-wider text-surface-text">TRACK</span>
+        </div>
+        <p class="text-xs text-surface-muted max-w-sm">
+          Intelligent routing engine for student makers. Bridging the gap between theory and physical fabrication.
+        </p>
+        <p class="text-[11px] text-surface-muted/70 mt-2 font-mono">
+          Rajiv Gandhi University of Knowledge Technologies (RGUKT) — Ongole Campus
+        </p>
+      </div>
+
+      <!-- Right: Direct Help & Email Actions -->
+      <div class="flex flex-col items-center md:items-end gap-3 text-center md:text-right">
+        <span class="text-xs font-mono font-bold tracking-wider text-brand uppercase">Official Venture Contact &amp; Support</span>
+        
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <a 
+            href="mailto:o220837@rguktong.ac.in" 
+            class="px-4 py-2 rounded-lg bg-surface-cardAlt border border-surface-border hover:border-brand/50 text-xs font-mono font-semibold text-surface-text flex items-center gap-2 transition"
+          >
+            <i class="fa-solid fa-envelope text-brand"></i>
+            <span>o220837@rguktong.ac.in</span>
+          </a>
+
+          <!-- Copy Email Action -->
+          <button 
+            id="copyEmailBtn"
+            class="px-3 py-2 rounded-lg bg-brand text-white hover:bg-brand-hover text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+            title="Copy email to clipboard"
+          >
+            <i class="fa-regular fa-copy text-xs"></i>
+            <span id="copyBtnText">Copy Email</span>
+          </button>
+
+          <!-- Feedback Modal Trigger -->
+          <button 
+            id="openFeedbackBtn"
+            class="px-3 py-2 rounded-lg bg-surface-cardAlt border border-surface-border hover:border-brand/50 text-xs font-bold text-surface-text transition"
+          >
+            <i class="fa-regular fa-comment-dots text-xs mr-1"></i> Send Feedback
+          </button>
+        </div>
+
+        <p class="text-[11px] text-surface-muted">
+          Lead Contact: <strong>Kavi Yaswanth Arudra</strong> | RGUKT Ongole
+        </p>
+      </div>
+
+    </div>
+
+    <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-surface-border/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-surface-muted gap-2">
+      <p>© 2026 ToolTrack. All rights reserved. Built for Wadhwani Foundation Venture Submission.</p>
+      <div class="flex gap-4 font-medium">
+        <span>TAM: ₹2,000 Cr</span>
+        <span>•</span>
+        <span>SAM: ₹250 Cr</span>
+        <span>•</span>
+        <span>SOM: ₹5.3 L</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification element -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-surface-card border border-brand/50 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3">
+    <i class="fa-solid fa-circle-check text-brand text-lg"></i>
+    <span id="toastMsg" class="text-xs font-semibold text-surface-text">Email copied to clipboard!</span>
+  </div>
+
+  <!-- Minimal Feedback Modal -->
+  <div id="feedbackModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-surface-card border border-surface-border max-w-md w-full rounded-2xl p-6 shadow-2xl relative">
+      <button id="closeFeedbackBtn" class="absolute top-4 right-4 text-surface-muted hover:text-surface-text">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-brand"></span>
+        <h3 class="font-bold text-base text-surface-text">Contact ToolTrack Team</h3>
+      </div>
+      <p class="text-xs text-surface-muted mb-4">
+        Need assistance with campus fabrication tools or have a partnership inquiry? Drop your note below.
+      </p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-mono font-bold text-surface-muted uppercase mb-1">Your Email</label>
+          <input type="email" id="feedbackEmail" placeholder="student@rguktong.ac.in" class="w-full px-3 py-2 bg-surface-cardAlt border border-surface-border rounded-lg text-xs text-surface-text focus:outline-none focus:border-brand">
+        </div>
+        <div>
+          <label class="block text-[11px] font-mono font-bold text-surface-muted uppercase mb-1">Project or Fabrication Need</label>
+          <textarea id="feedbackNote" rows="3" placeholder="Describe your hardware project, required tool, or question..." class="w-full px-3 py-2 bg-surface-cardAlt border border-surface-border rounded-lg text-xs text-surface-text focus:outline-none focus:border-brand"></textarea>
+        </div>
+        <button id="sendFeedbackSubmit" class="w-full py-2.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-bold transition shadow-sm">
+          Send Message to o220837@rguktong.ac.in
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // App State
+    let currentMode = 'free'; // 'free' or 'pro'
+    let remainingFreeSearches = 3;
+
+    // Database of Realistic Pre-Engineered Routes
+    const routeDatabase = {
+      "Speaker for listening songs": {
+        queryTitle: "Speaker for Listening to Songs",
+        description: "Benchmark for producing or sourcing a portable audio solution for hostel or workspace use.",
+        routes: [
+          {
+            type: "commercial",
+            badge: "Commercial Purchase",
+            badgeColor: "gray",
+            title: "Pre-Built 10W Bluetooth Speaker",
+            cost: 799,
+            costFormatted: "₹799",
+            time: "2-3 Days",
+            difficulty: "None (Plug & Play)",
+            toolsNeeded: ["None"],
+            method: "Order commercially assembled IPX5 portable speaker online.",
+            proBenefit: "Verified Amazon & Croma student deal. Instant delivery.",
+            freeVendorPath: "Search e-commerce platforms for '10W mini bluetooth speaker'.",
+            proVendorLink: "https://www.amazon.in/s?k=10w+bluetooth+speaker",
+            proStoreName: "Amazon India (Student Prime)",
+            couponCode: "STUDENT10",
+            couponDesc: "Save ₹80 on audio electronics",
+            toolLocker: "N/A — Pre-packaged ready retail product."
+          },
+          {
+            type: "modular",
+            badge: "Modular DIY Build",
+            badgeColor: "orange",
+            title: "PAM8403 + 5W Driver + 18650 Cell",
+            cost: 185,
+            costFormatted: "₹185",
+            time: "2.5 Hours",
+            difficulty: "Medium (Soldering)",
+            toolsNeeded: ["Soldering Iron", "Wire Stripper", "Hot Glue Gun"],
+            method: "Wire 2x 3W/4Ω full range drivers to PAM8403 D-Class amplifier and TP4056 lithium battery charger.",
+            proBenefit: "Direct part links on Robu.in + free campus soldering locker reserved.",
+            freeVendorPath: "Source PAM8403 module + 3W speaker driver from local component seller.",
+            proVendorLink: "https://robu.in/product/pam8403-mini-5v-digital-amplifier-board/",
+            proStoreName: "Robu.in Maker Direct",
+            couponCode: "ROBUROOKIE15",
+            couponDesc: "15% off first component order",
+            toolLocker: "RGUKT ECE Lab 2 — Workstation #4 (Free soldering iron & solder flux available)"
+          },
+          {
+            type: "digital",
+            badge: "3D Print Custom Enclosure",
+            badgeColor: "amber",
+            title: "Acoustic PLA Chamber + Dual 3W Drivers",
+            cost: 340,
+            costFormatted: "₹340",
+            time: "4 Hours",
+            difficulty: "Advanced Maker",
+            toolsNeeded: ["3D Printer (Ender-3)", "Slicing Software", "Soldering Kit"],
+            method: "Download parametric bass-reflex STL file and print in 20% infill PLA with passive radiator chamber.",
+            proBenefit: "Instant STL download link + campus 3D printer slot booking.",
+            freeVendorPath: "Find free speaker box STL on Thingiverse and queue at campus lab.",
+            proVendorLink: "https://www.printables.com/search/models?q=speaker+box",
+            proStoreName: "Printables STL Locker",
+            couponCode: "FILAMENT20",
+            couponDesc: "20% off 1kg PLA spool",
+            toolLocker: "RGUKT Mechanical Innovation Lab — Ender-3 v2, Filament Slot 02"
+          }
+        ]
+      },
+
+      "Badge / ID Card Enclosure": {
+        queryTitle: "Badge / ID Card Protective Enclosure",
+        description: "Fabricating a durable, scratch-resistant campus ID holder with neck lanyard clip.",
+        routes: [
+          {
+            type: "commercial",
+            badge: "Commercial Vendor",
+            badgeColor: "gray",
+            title: "Campus Print Shop Rigid Badge Holder",
+            cost: 150,
+            costFormatted: "₹150",
+            time: "48 Hours",
+            difficulty: "None (Outsourced)",
+            toolsNeeded: ["None"],
+            method: "Outsource molding and clear acrylic heat-sealing to local campus print shop.",
+            proBenefit: "Verified local campus vendor queue priority.",
+            freeVendorPath: "Walk to local college xerox and stationery store.",
+            proVendorLink: "#",
+            proStoreName: "Campus Central Stationery",
+            couponCode: "ONGOLE10",
+            couponDesc: "10% off ID lamination & sleeves",
+            toolLocker: "N/A — Outsource vendor handled."
+          },
+          {
+            type: "digital",
+            badge: "Digital Fabrication",
+            badgeColor: "orange",
+            title: "3D Printed Snap-Fit PLA Badge",
+            cost: 35,
+            costFormatted: "₹35",
+            time: "2 Hours",
+            difficulty: "Low (Basic 3D Print)",
+            toolsNeeded: ["Campus 3D Printer", "0.4mm Nozzle PLA"],
+            method: "Slice compact 12g snap-fit case using calibrated 0.2mm layer height with integrated lanyard hook.",
+            proBenefit: "Download optimized low-tolerance GCode directly.",
+            freeVendorPath: "Request 3D printing slot from lab assistant.",
+            proVendorLink: "https://www.thingiverse.com/search?q=id+badge+holder",
+            proStoreName: "Thingiverse Parametric STL",
+            couponCode: "LABMAKER5",
+            couponDesc: "Zero lab surcharge ticket",
+            toolLocker: "RGUKT Makerspace — Rack B, Printer Unit 1 (Free for registered students)"
+          },
+          {
+            type: "hack",
+            badge: "Smart DIY Hack",
+            badgeColor: "green",
+            title: "Folded Laminated Cardstock + Acetate Sheet",
+            cost: 5,
+            costFormatted: "₹5",
+            time: "15 Mins",
+            difficulty: "Very Easy",
+            toolsNeeded: ["Scissors / Utility Knife", "Clear Tape", "Paper Punch"],
+            method: "Fold heavy 250 GSM chart cardstock, frame with transparent OHP sheet, and punch lanyard eyelet.",
+            proBenefit: "Printable exact-scale folding template (PDF).",
+            freeVendorPath: "Use leftover chart paper and transparency sheet from hostel room.",
+            proVendorLink: "#",
+            proStoreName: "Local Room Resources",
+            couponCode: "FREEHACK",
+            couponDesc: "Zero cost hostel room build",
+            toolLocker: "RGUKT Student Common Room — Station Tools Kit #1"
+          }
+        ]
+      },
+
+      "Arduino Sensor Enclosure": {
+        queryTitle: "Arduino Uno / Nano Sensor Enclosure",
+        description: "Housing for microcontroller, DHT11/ultrasonic sensor, and 9V battery harness.",
+        routes: [
+          {
+            type: "commercial",
+            badge: "Commercial Enclosure",
+            badgeColor: "gray",
+            title: "Molded ABS Electronics Project Box",
+            cost: 220,
+            costFormatted: "₹220",
+            time: "2-4 Days",
+            difficulty: "Low (Drilling holes required)",
+            toolsNeeded: ["Hand Drill", "M3 Screws"],
+            method: "Purchase standard IP54 waterproof ABS project box and drill custom wire glands.",
+            proBenefit: "Direct link to exact dimensions on electronics portal.",
+            freeVendorPath: "Look up ABS project box on electronic component portals.",
+            proVendorLink: "https://robu.in/product-category/accessories-components/diy-electronics/project-box-enclosure/",
+            proStoreName: "Robu Project Hardware",
+            couponCode: "CIRCUIT10",
+            couponDesc: "10% off project enclosures",
+            toolLocker: "RGUKT ECE Hardware Workshop — Drill Press #1"
+          },
+          {
+            type: "digital",
+            badge: "Digital Fabrication",
+            badgeColor: "orange",
+            title: "Custom Cut Laser Acrylic Casing",
+            cost: 65,
+            costFormatted: "₹65",
+            time: "1.5 Hours",
+            difficulty: "Medium",
+            toolsNeeded: ["Laser Cutter / Lab Vector Plotter", "Acrylic Glue"],
+            method: "Laser-cut interlocking finger-joint panels from 2.5mm scrap acrylic sheets.",
+            proBenefit: "DXF cutting layout file pre-measured for Uno + OLED display.",
+            freeVendorPath: "Find open-source box maker DXF generator online.",
+            proVendorLink: "https://en.makercase.com/",
+            proStoreName: "MakerCase Vector Engine",
+            couponCode: "LASERCUT20",
+            couponDesc: "Free scrap acrylic sheet pass",
+            toolLocker: "RGUKT FabLab — 40W CO2 Laser Machine (Free access during open lab hours)"
+          },
+          {
+            type: "hack",
+            badge: "Smart DIY Hack",
+            badgeColor: "green",
+            title: "Repurposed Tic-Tac / Mint Tin Shield Box",
+            cost: 15,
+            costFormatted: "₹15",
+            time: "20 Mins",
+            difficulty: "Easy",
+            toolsNeeded: ["Rotary Tool or Heated Blade", "Electrical Tape"],
+            method: "Insulate metal confectionery tin with kapton tape, punch sensor port with heated solder tip.",
+            proBenefit: "Step-by-step Faraday shield grounding diagram.",
+            freeVendorPath: "Empty mint tin or rigid polypropylene candy container.",
+            proVendorLink: "#",
+            proStoreName: "Household Upcycling",
+            couponCode: "ZEROBUCK",
+            couponDesc: "100% recycled hostel fabrication",
+            toolLocker: "Hostel Maintenance Locker — Insulation tape & pliers available"
+          }
+        ]
+      },
+
+      "Custom PCB Breakout Board": {
+        queryTitle: "Custom PCB Breakout / Prototype",
+        description: "Fabricating a reliable circuit breakout from schematic to testable board.",
+        routes: [
+          {
+            type: "commercial",
+            badge: "Commercial PCB Fab",
+            badgeColor: "gray",
+            title: "Factory Fabricated 2-Layer PCB Batch",
+            cost: 600,
+            costFormatted: "₹600 (5 boards)",
+            time: "5-7 Days",
+            difficulty: "None (CAD export only)",
+            toolsNeeded: ["None"],
+            method: "Export Gerber files and submit to fast-turnaround domestic fabrication facility.",
+            proBenefit: "Direct student verification link with 50% prototyping coupon.",
+            freeVendorPath: "Search standard PCB manufacturing houses.",
+            proVendorLink: "https://www.jlcpcb.com/",
+            proStoreName: "JLCPCB / Domestic Fab Partner",
+            couponCode: "STUDENTPCB",
+            couponDesc: "$5 prototyping discount code",
+            toolLocker: "N/A — Commercial courier delivery."
+          },
+          {
+            type: "digital",
+            badge: "Lab CNC Milling",
+            badgeColor: "orange",
+            title: "Isolation-Milled Single Layer PCB",
+            cost: 50,
+            costFormatted: "₹50",
+            time: "2 Hours",
+            difficulty: "Medium-High",
+            toolsNeeded: ["Desktop CNC (Genmitsu)", "0.1mm V-bit", "FR2 Copper Clad"],
+            method: "Convert Gerber to G-code via FlatCAM and isolate traces on 10x10cm copper clad.",
+            proBenefit: "Pre-calibrated feeds and speeds profile for lab bits.",
+            freeVendorPath: "Request CNC PCB slot in college robotics room.",
+            proVendorLink: "https://flatcam.org/",
+            proStoreName: "FlatCAM GCode Tool",
+            couponCode: "BITSAVER",
+            couponDesc: "Free replacement V-carve bit",
+            toolLocker: "RGUKT Robotics Club Lab — CNC Router Station (Free for members)"
+          },
+          {
+            type: "hack",
+            badge: "Smart DIY Hack",
+            badgeColor: "green",
+            title: "Toner-Transfer Ferric Chloride Etching",
+            cost: 25,
+            costFormatted: "₹25",
+            time: "45 Mins",
+            difficulty: "Medium",
+            toolsNeeded: ["Clothes Iron", "Ferric Chloride (FeCl3)", "Glossy Magazine Paper"],
+            method: "Print schematic on laser printer, heat transfer toner to copper board, etch in chemical bath.",
+            proBenefit: "Accurate etch time chart & safety neutralization guide.",
+            freeVendorPath: "Use hostel iron and ferric chloride from chemistry surplus.",
+            proVendorLink: "#",
+            proStoreName: "DIY Lab Bench Chemistry",
+            couponCode: "ETCHSAFE",
+            couponDesc: "Free chemical disposal guidelines",
+            toolLocker: "RGUKT Chemistry Store — Chemical hood & etching tray"
+          }
+        ]
+      }
+    };
+
+    // Function to generate dynamic fallback routes for custom entered tasks
+    function generateFallbackRoutes(taskQuery) {
+      const clean = taskQuery.trim();
+      return {
+        queryTitle: clean,
+        description: `Custom route benchmark generated for "${clean}".`,
+        routes: [
+          {
+            type: "commercial",
+            badge: "Commercial Vendor",
+            badgeColor: "gray",
+            title: `Outsource / Buy "${clean}" Online`,
+            cost: 450,
+            costFormatted: "₹450",
+            time: "48-72 Hours",
+            difficulty: "None (Vendor Handled)",
+            toolsNeeded: ["None"],
+            method: `Order pre-built unit or custom machining from standard fabrication services.`,
+            proBenefit: "Direct verified vendor order matching with guaranteed turn-around.",
+            freeVendorPath: `Search domestic portals for ${clean}.`,
+            proVendorLink: "https://www.google.com/search?q=" + encodeURIComponent(clean + " buy online india"),
+            proStoreName: "Verified Vendor Network",
+            couponCode: "STUDENT10",
+            couponDesc: "10% off commercial supplier orders",
+            toolLocker: "N/A — Outsource vendor handled."
+          },
+          {
+            type: "digital",
+            badge: "Digital Fabrication",
+            badgeColor: "orange",
+            title: `3D Print / CNC Lab Build`,
+            cost: 65,
+            costFormatted: "₹65",
+            time: "2.5 Hours",
+            difficulty: "Medium",
+            toolsNeeded: ["3D Printer / Laser Cutter", "Basic Slicer"],
+            method: `Manufacture using campus makerspace rapid prototyping tools with standard PLA or acrylic.`,
+            proBenefit: "Direct link to parametric 3D model files & tool locker reservations.",
+            freeVendorPath: "Request slot in campus digital fabrication center.",
+            proVendorLink: "https://www.printables.com/search/models?q=" + encodeURIComponent(clean),
+            proStoreName: "Printables CAD Hub",
+            couponCode: "LABPASS",
+            couponDesc: "Priority queue pass for campus labs",
+            toolLocker: "RGUKT Makerspace — Tool Station 3 (Available daily 4 PM - 8 PM)"
+          },
+          {
+            type: "hack",
+            badge: "Smart DIY Hack",
+            badgeColor: "green",
+            title: `Low-Cost Hostel Resource Hack`,
+            cost: 15,
+            costFormatted: "₹15",
+            time: "30 Mins",
+            difficulty: "Easy",
+            toolsNeeded: ["Hand Shears / Cutter", "Adhesive Tape", "Scrap Material"],
+            method: `Construct prototype using upcycled cardstock, PVC, or common hostel materials.`,
+            proBenefit: "Zero tooling hurdle with pre-checked material substitutions.",
+            freeVendorPath: "Gather scrap cardboard and wire from hostel maker bin.",
+            proVendorLink: "#",
+            proStoreName: "Hostel Upcycling Matrix",
+            couponCode: "DIYHERO",
+            couponDesc: "100% cost reduction benchmark",
+            toolLocker: "RGUKT Student Common Room — General Purpose Hand Tools Box"
+          }
+        ]
+      };
+    }
+
+    // Function to render the active simulation mode status banner
+    function renderTierBanner() {
+      const banner = document.getElementById('tierStatusBanner');
+      if (currentMode === 'free') {
+        banner.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span class="font-medium text-surface-text">
+              Active Tier: <strong>Free Plan</strong> 
+              <span class="text-surface-muted font-normal">(${remainingFreeSearches}/5 weekly searches remaining)</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-surface-muted hidden md:inline">🔒 Store buy links, discount coupons, and lab lockers are hidden.</span>
+            <button onclick="setSimulationMode('pro')" class="font-bold text-brand hover:underline flex items-center gap-1">
+              <span>Switch to Pro (₹100/yr) to unlock</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        banner.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="font-medium text-surface-text">
+              Active Tier: <strong class="text-brand">ToolTrack Pro (₹100/year)</strong> 
+              <span class="text-emerald-500 font-mono font-bold ml-1">● UNLIMITED SEARCHES</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-emerald-400 font-medium">✓ All 1-click vendor buy links, discount coupons &amp; campus tool lockers unlocked!</span>
+            <button onclick="setSimulationMode('free')" class="text-surface-muted hover:text-surface-text text-[11px] underline">
+              Revert to Free
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // Function to render the route cards into the DOM
+    function renderRoutes(data) {
+      const container = document.getElementById('routesContainer');
+      container.innerHTML = '';
+
+      data.routes.forEach((route, index) => {
+        const isLowestCost = route.cost === Math.min(...data.routes.map(r => r.cost));
+        const isFastest = index === 2; // Typically the DIY hack is fastest
+
+        const card = document.createElement('div');
+        card.className = `bg-surface-card border ${isLowestCost ? 'border-brand/70 orange-glow' : 'border-surface-border'} rounded-2xl p-5 flex flex-col justify-between card-hover transition-all relative overflow-hidden`;
+
+        // Card Badges Header
+        let badgesHtml = `
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded uppercase ${
+              route.badgeColor === 'orange' ? 'bg-brand/10 text-brand border border-brand/20' : 
+              route.badgeColor === 'green' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
+              'bg-surface-cardAlt text-surface-muted border border-surface-border'
+            }">
+              Route ${index + 1}: ${route.badge}
+            </span>
+            ${isLowestCost ? '<span class="text-[9px] font-extrabold uppercase tracking-wide bg-brand text-white px-2 py-0.5 rounded-full">Lowest Cost</span>' : ''}
+          </div>
+        `;
+
+        // Financial & Time Metrics Matrix
+        let metricsHtml = `
+          <div class="mb-4">
+            <h3 class="font-bold text-base text-surface-text line-clamp-1 mb-2">${route.title}</h3>
+            
+            <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-surface-cardAlt text-center">
+              <div>
+                <span class="text-[10px] text-surface-muted uppercase font-mono block">Estimated Cost</span>
+                <span class="text-base font-extrabold font-mono ${isLowestCost ? 'text-brand' : 'text-surface-text'}">${route.costFormatted}</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-surface-muted uppercase font-mono block">Turnaround</span>
+                <span class="text-xs font-bold text-surface-text mt-0.5 block">${route.time}</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-surface-muted uppercase font-mono block">Complexity</span>
+                <span class="text-xs font-semibold text-surface-muted mt-0.5 block">${route.difficulty}</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Execution Details & Tools
+        let detailsHtml = `
+          <div class="space-y-3 mb-5 text-xs">
+            <div>
+              <span class="text-[10px] font-mono uppercase text-surface-muted font-bold block mb-1">Execution Method:</span>
+              <p class="text-surface-muted leading-relaxed">${route.method}</p>
+            </div>
+
+            <div>
+              <span class="text-[10px] font-mono uppercase text-surface-muted font-bold block mb-1">Required Tools:</span>
+              <div class="flex flex-wrap gap-1">
+                ${route.toolsNeeded.map(tool => `
+                  <span class="text-[11px] px-2 py-0.5 rounded bg-surface-cardAlt border border-surface-border text-surface-text font-medium">
+                    <i class="fa-solid fa-wrench text-[9px] text-brand mr-1"></i>${tool}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+
+        // PRO-EXCLUSIVE SECTION VS FREE LOCKED PREVIEW
+        let proLockedHtml = '';
+        if (currentMode === 'free') {
+          proLockedHtml = `
+            <div class="mt-auto pt-4 border-t border-surface-border">
+              <div class="p-3 rounded-xl bg-surface-cardAlt/60 border border-surface-border/80 flex flex-col gap-2 relative">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-mono font-bold text-surface-muted flex items-center gap-1">
+                    <i class="fa-solid fa-lock text-brand text-[10px]"></i> Part Links &amp; Coupons
+                  </span>
+                  <span class="text-[9px] font-bold uppercase bg-brand/10 text-brand px-1.5 py-0.5 rounded">Pro (₹100/yr)</span>
+                </div>
+                <p class="text-[11px] text-surface-muted filter blur-[2px] select-none">
+                  Direct Buy: ${route.proStoreName} - Coupon: ${route.couponCode} (15% OFF)
+                </p>
+                <div class="flex items-center justify-between text-[11px] pt-1">
+                  <span class="text-surface-muted text-[10px]">Campus Tool Locker:</span>
+                  <span class="text-surface-muted font-mono filter blur-[2.5px] select-none">RGUKT Lab 2 Rack 4</span>
+                </div>
+                <button onclick="setSimulationMode('pro')" class="mt-1 w-full py-1.5 rounded-lg bg-surface-card border border-brand/40 text-brand font-bold text-[11px] hover:bg-brand hover:text-white transition">
+                  Unlock Links &amp; Locker with Pro (₹100)
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          // PRO MODE UNLOCKED STATE
+          proLockedHtml = `
+            <div class="mt-auto pt-4 border-t border-brand/30">
+              <div class="p-3 rounded-xl bg-brand/5 border border-brand/30 flex flex-col gap-2.5">
+                
+                <!-- 1-Click Buy Link -->
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-mono font-bold uppercase text-brand flex items-center gap-1">
+                    <i class="fa-solid fa-cart-shopping text-xs"></i> 1-Click Direct Buy
+                  </span>
+                  ${route.proVendorLink !== '#' ? `
+                    <a href="${route.proVendorLink}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-brand hover:underline flex items-center gap-1">
+                      <span>${route.proStoreName}</span>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                    </a>
+                  ` : `
+                    <span class="text-[11px] font-semibold text-surface-text">${route.proStoreName}</span>
+                  `}
+                </div>
+
+                <!-- Verified Discount Coupon -->
+                <div class="flex items-center justify-between bg-surface-card p-2 rounded-lg border border-surface-border">
+                  <div>
+                    <span class="text-[9px] font-mono text-surface-muted uppercase block">Active Coupon</span>
+                    <span class="text-xs font-mono font-extrabold text-brand tracking-wider">${route.couponCode}</span>
+                  </div>
+                  <button onclick="copyToClipboard('${route.couponCode}', 'Coupon code copied! Paste at checkout to save.')" class="px-2 py-1 bg-brand/10 hover:bg-brand hover:text-white text-brand text-[10px] font-bold rounded transition">
+                    Copy Code
+                  </button>
+                </div>
+
+                <!-- Campus Tool Locker Location -->
+                <div>
+                  <span class="text-[10px] font-mono font-bold uppercase text-emerald-400 block mb-0.5">
+                    <i class="fa-solid fa-location-dot mr-1"></i> Campus Tool Locker Radar
+                  </span>
+                  <p class="text-[11px] font-medium text-surface-text bg-surface-card p-2 rounded-lg border border-surface-border">
+                    ${route.toolLocker}
+                  </p>
+                </div>
+
+              </div>
+            </div>
+          `;
+        }
+
+        card.innerHTML = badgesHtml + metricsHtml + detailsHtml + proLockedHtml;
+        container.appendChild(card);
+      });
+    }
+
+    // Execute route lookup
+    function executeSearch(query) {
+      if (currentMode === 'free') {
+        if (remainingFreeSearches <= 0) {
+          showToast("Weekly free search limit reached (5/5)! Switch to Pro for unlimited searches.");
+          return;
+        }
+        remainingFreeSearches--;
+      }
+
+      // Check predefined database
+      let match = routeDatabase[query];
+      if (!match) {
+        // Fallback for custom user input
+        match = generateFallbackRoutes(query);
+      }
+
+      renderTierBanner();
+      renderRoutes(match);
+    }
+
+    // Switch between Free and Pro simulation modes
+    function setSimulationMode(mode) {
+      currentMode = mode;
+      const viewFreeBtn = document.getElementById('viewFreeBtn');
+      const viewProBtn = document.getElementById('viewProBtn');
+
+      if (mode === 'pro') {
+        viewProBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand text-white shadow-sm";
+        viewFreeBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-surface-muted hover:text-surface-text";
+        showToast("Switched to ToolTrack Pro (₹100/yr). All vendor links, discount coupons & tool lockers unlocked!");
+      } else {
+        viewFreeBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand text-white shadow-sm";
+        viewProBtn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-surface-muted hover:text-surface-text";
+        showToast("Switched to Standard Free View (5 searches/week limit).");
+      }
+
+      const activeQuery = document.getElementById('taskInput').value.trim() || "Speaker for listening songs";
+      let match = routeDatabase[activeQuery] || generateFallbackRoutes(activeQuery);
+      renderTierBanner();
+      renderRoutes(match);
+    }
+
+    // Clipboard Copy Helper (Iframe and security safe)
+    function copyToClipboard(text, customMessage) {
+      try {
+        const tempInput = document.createElement("input");
+        tempInput.style.position = "absolute";
+        tempInput.style.left = "-1000px";
+        tempInput.style.top = "-1000px";
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        const successful = document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
+        if (successful) {
+          showToast(customMessage || `Copied "${text}" to clipboard!`);
+        } else {
+          showToast(`Copied text: ${text}`);
+        }
+      } catch (err) {
+        showToast(`Text to copy: ${text}`);
+      }
+    }
+
+    // Toast Notification Display
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    // Event Listeners on Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initialize first search
+      executeSearch("Speaker for listening songs");
+
+      // Search button
+      document.getElementById('calculateBtn').addEventListener('click', () => {
+        const val = document.getElementById('taskInput').value.trim();
+        if (val) executeSearch(val);
+      });
+
+      // Enter key in input
+      document.getElementById('taskInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const val = document.getElementById('taskInput').value.trim();
+          if (val) executeSearch(val);
+        }
+      });
+
+      // Quick preset pill buttons
+      document.querySelectorAll('.preset-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+          const query = e.currentTarget.getAttribute('data-query');
+          document.getElementById('taskInput').value = query;
+          executeSearch(query);
+        });
+      });
+
+      // Mode toggles
+      document.getElementById('viewFreeBtn').addEventListener('click', () => setSimulationMode('free'));
+      document.getElementById('viewProBtn').addEventListener('click', () => setSimulationMode('pro'));
+
+      // Theme toggle (Dark / Light)
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      const themeIcon = document.getElementById('themeIcon');
+      themeToggleBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        if (isDark) {
+          themeIcon.className = "fa-solid fa-moon text-sm";
+          showToast("Switched to Dark Minimalist Theme");
+        } else {
+          themeIcon.className = "fa-solid fa-sun text-sm text-amber-500";
+          showToast("Switched to Light Minimalist Theme");
+        }
+      });
+
+      // Copy official email
+      const copyEmailBtn = document.getElementById('copyEmailBtn');
+      copyEmailBtn.addEventListener('click', () => {
+        copyToClipboard('o220837@rguktong.ac.in', 'Official support email (o220837@rguktong.ac.in) copied!');
+      });
+
+      // Feedback modal controls
+      const feedbackModal = document.getElementById('feedbackModal');
+      const openFeedbackBtn = document.getElementById('openFeedbackBtn');
+      const closeFeedbackBtn = document.getElementById('closeFeedbackBtn');
+      const sendFeedbackSubmit = document.getElementById('sendFeedbackSubmit');
+
+      openFeedbackBtn.addEventListener('click', () => feedbackModal.classList.remove('hidden'));
+      closeFeedbackBtn.addEventListener('click', () => feedbackModal.classList.add('hidden'));
+      feedbackModal.addEventListener('click', (e) => {
+        if (e.target === feedbackModal) feedbackModal.classList.add('hidden');
+      });
+
+      sendFeedbackSubmit.addEventListener('click', () => {
+        const note = document.getElementById('feedbackNote').value.trim();
+        if (!note) {
+          showToast("Please enter your message before sending.");
+          return;
+        }
+        feedbackModal.classList.add('hidden');
+        document.getElementById('feedbackNote').value = '';
+        showToast("Message noted! You can also email directly to o220837@rguktong.ac.in.");
+      });
+    });
+  </script>
+</body>
+</html>
